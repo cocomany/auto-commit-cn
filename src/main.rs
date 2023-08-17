@@ -75,7 +75,8 @@ async fn main() -> Result<(), ()> {
 
     let api_token = std::env::var("OPENAI_API_KEY").unwrap_or_else(|_| {
         //自己编译使用的话，可以把API_KEY写死在这里
-        env::set_var("OPENAI_API_KEY", "sk-NOT-SET");
+        let openai_api_key="sk-NOT-SET";
+        openai_api_key.to_string()
     });
 
 
