@@ -1,56 +1,44 @@
-![banner](https://user-images.githubusercontent.com/23558090/198913411-730bd7ff-3d9b-4a5e-831c-55691f97e11a.jpg)
+# 自动生成的提交信息
+本项目Folk自 [m1guelpf/auto-commit]（https://github.com/m1guelpf/auto-commit）， 为适配墙内使用，修改了部分代码，并添加了中文支持。
 
-# Automagically-generated commit messages
+这是一个使用[Rust](https://www.rust-lang.org/)构建的CLI工具，利用[OpenAI的GPT-3.5](https://platform.openai.com/overview)从您的暂存更改中生成提交信息。
 
-A CLI tool that generates commit messages from your staged changes, built in Rust and using [OpenAI's GPT-3.5](https://platform.openai.com/overview).
+## 安装
 
-## Installation
+您可以从[最新版本发布页面](https://github.com/cocomany/auto-commit-cn/releases/latest)下载适用于您操作系统的二进制文件。
+将此文件放到系统环境变量路径下。比如Windows下的 C:\Windows,  Linux下的 /usr/bin/ 
 
-You can install `auto-commit` by running the following command in your terminal.
+## 使用
 
-```
-curl -fsSL https://raw.githubusercontent.com/m1guelpf/auto-commit/main/install.sh | sh -
-```
-
-Or, if you're an arch user, you can download it from the [AUR](https://aur.archlinux.org/) using
-
-```sh
-yay -S auto-commit
-```
-
-You may need to close and reopen your terminal after installation. Alternatively, you can download the binary corresponding to your OS from the [latest release](https://github.com/m1guelpf/auto-commit/releases/latest).
-
-## Usage
-
-`auto-commit` uses GPT-3.5. To use it, grab an API key from [your dashboard](https://beta.openai.com/), and save it to `OPENAI_API_KEY` as follows (you can also save it in your bash/zsh profile for persistance between sessions).
+`auto-commit`使用GPT-3.5进行工作。要使用它，请从[您的控制台](https://platform.openai.com/)获取API密钥，并将其保存到`OPENAI_API_KEY`中（您还可以将其保存在bash/zsh配置文件中以在会话之间保持持久性）。
 
 ```bash
 export OPENAI_API_KEY='sk-XXXXXXXX'
 ```
 
-Once you have configured your environment, stage some changes by running, for example, `git add .`, and then run `auto-commit`.
+配置好环境后，通过运行例如 `git add .` 来暂存一些更改，然后运行 `auto-commit`。
 
-Of course, `auto-commit` also includes some options, for editing the message before commiting, or just printing the message to the terminal.
+当然，`auto-commit`还包括一些选项，用于在提交之前编辑消息或仅将消息打印到终端。
 
 ```sh
 $ auto-commit --help
-Automagically generate commit messages.
+自动生成提交信息。
 
-Usage: auto-commit [OPTIONS]
+用法: auto-commit [OPTIONS]
 
-Options:
-  -v, --verbose...  More output per occurrence
-  -q, --quiet...    Less output per occurrence
-      --dry-run     Output the generated message, but don't create a commit.
-  -r, --review      Edit the generated commit message before committing.
-  -h, --help        Print help information
-  -V, --version     Print version information
+选项:
+  -v, --verbose...  每次发生事件时输出更多信息
+  -q, --quiet...    每次发生事件时输出较少信息
+      --dry-run     输出生成的消息，但不创建提交。
+  -r, --review      在提交之前编辑生成的提交消息。
+  -h, --help        打印帮助信息
+  -V, --version     打印版本信息
 ```
 
-## Develop
+## 开发
 
-Make sure you have the latest version of rust installed (use [rustup](https://rustup.rs/)). Then, you can build the project by running `cargo build`, and run it with `cargo run`.
+确保您已安装最新版本的Rust（使用[rustup](https://rustup.rs/)）。然后，您可以通过运行`cargo build`构建项目，并使用`cargo run`运行它。
 
-## License
+## 许可证
 
-This project is open-sourced under the MIT license. See [the License file](LICENSE) for more information.
+该项目在MIT许可下开源。有关更多信息，请参阅[许可证文件](LICENSE)。 

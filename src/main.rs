@@ -21,32 +21,33 @@ use std::{
     process::{Command, Stdio},
     str,
 };
-
+use std::env;
 #[derive(Parser)]
 #[command(version)]
 #[command(name = "Auto Commit")]
 #[command(author = "Miguel Piedrafita <soy@miguelpiedrafita.com>")]
-#[command(about = "Automagically generate commit messages.", long_about = None)]
+#[command(about = "Automagically generate commit messages. 202308, 适配国内使用", long_about = None)]
 struct Cli {
     #[clap(flatten)]
     verbose: Verbosity<InfoLevel>,
 
     #[arg(
         long = "dry-run",
-        help = "Output the generated message, but don't create a commit."
+        help = "输出生成的消息，但不创建提交。"
     )]
     dry_run: bool,
 
     #[arg(
         short,
         long,
-        help = "Edit the generated commit message before committing."
+        help = "在提交之前编辑生成的提交消息。"
     )]
     review: bool,
 
-    #[arg(short, long, help = "Don't ask for confirmation before committing.")]
+    #[arg(short, long, help = "在提交之前不要询问确认。")]
     force: bool,
 }
+
 
 #[derive(Debug, serde::Deserialize, JsonSchema)]
 struct Commit {
@@ -70,37 +71,43 @@ async fn main() -> Result<(), ()> {
         .filter_level(cli.verbose.log_level_filter())
         .init();
 
+    env::set_var("OPENAI_API_BASE", "https://ai.fakeopen.com");
+
     let api_token = std::env::var("OPENAI_API_KEY").unwrap_or_else(|_| {
-        error!("Please set the OPENAI_API_KEY environment variable.");
-        std::process::exit(1);
+        //自己编译使用的话，可以把API_KEY写死在这里
+        env::set_var("OPENAI_API_KEY", "sk-NOT-SET");
     });
+
 
     let git_staged_cmd = Command::new("git")
         .arg("diff")
         .arg("--staged")
         .output()
-        .expect("Couldn't find diff.")
+        .expect("找不到命令 diff.")
         .stdout;
 
     let git_staged_cmd = str::from_utf8(&git_staged_cmd).unwrap();
 
     if git_staged_cmd.is_empty() {
-        error!("There are no staged files to commit.\nTry running `git add` to stage some files.");
+        error!("没有要提交的暂存文件。\n尝试运行 `git add` 命令来暂存一些文件。");
     }
 
     let is_repo = Command::new("git")
         .arg("rev-parse")
         .arg("--is-inside-work-tree")
         .output()
-        .expect("Failed to check if this is a git repository.")
+        .expect("无法检查是否为 Git 仓库。")
         .stdout;
 
     if str::from_utf8(&is_repo).unwrap().trim() != "true" {
-        error!("It looks like you are not in a git repository.\nPlease run this command from the root of a git repository, or initialize one using `git init`.");
+        error!("看起来你不在一个 Git 仓库中。\n请从 Git 仓库的根目录运行此命令，或者使用 `git init` 初始化一个新的仓库。");
         std::process::exit(1);
     }
 
-    let client = async_openai::Client::with_config(OpenAIConfig::new().with_api_key(api_token));
+
+     let client = async_openai::Client::with_config(OpenAIConfig::new().with_api_key(api_token));
+     //let client = async_openai::Client::with_config(OpenAIConfig::new().with_api_key(api_token).with_base_url(base_url));
+
 
     let output = Command::new("git")
         .arg("diff")
@@ -144,7 +151,7 @@ async fn main() -> Result<(), ()> {
 
         let spinner = vs.choose(&mut rand::thread_rng()).unwrap().clone();
 
-        Some(Spinner::new(spinner, "Analyzing Codebase...".into()))
+        Some(Spinner::new(spinner, "分析代码库...".into()))
     } else {
         None
     };
@@ -163,7 +170,8 @@ async fn main() -> Result<(), ()> {
                     ChatCompletionRequestMessage {
                         role: Role::System,
                         content: Some(
-                            "You are an experienced programmer who writes great commit messages."
+                           // "You are an experienced programmer who writes great commit messages in CHINESE."
+                           "你是一个经验丰富的程序开发人员，提交代码时会清晰准确的书写commit信息。所有的commit信息都用中文输出。"
                                 .to_string(),
                         ),
                         ..Default::default()
@@ -188,7 +196,7 @@ async fn main() -> Result<(), ()> {
                     ChatCompletionFunctions {
                         name: "get_diff".to_string(),
                         description: Some(
-                            "Returns the output of `git diff HEAD` as a string.".to_string(),
+                            "返回 `git status` 的结果为字符串，并翻译为中文".to_string(),
                         ),
                         parameters: Some(json!({
                             "type": "object",
@@ -198,7 +206,8 @@ async fn main() -> Result<(), ()> {
                     ChatCompletionFunctions {
                         name: "commit".to_string(),
                         description: Some(
-                            "Creates a commit with the given title and a description.".to_string(),
+                           // "Creates a commit with the given title and a description.".to_string(),
+                           "根据提供的描述，创建一个简洁的commit. 并用中文输出".to_string(),
                         ),
                         parameters: Some(serde_json::to_value(commit_schema).unwrap()),
                     },
@@ -207,7 +216,7 @@ async fn main() -> Result<(), ()> {
                     json!({ "name": "commit" }),
                 ))
                 .model("gpt-3.5-turbo-16k")
-                .temperature(0.0)
+                .temperature(0.1)
                 .max_tokens(2000u16)
                 .build()
                 .unwrap(),
