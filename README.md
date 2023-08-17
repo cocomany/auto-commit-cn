@@ -1,5 +1,5 @@
 # 自动生成的提交信息
-本项目Folk自 [m1guelpf/auto-commit]（https://github.com/m1guelpf/auto-commit）， 为适配墙内使用，修改了部分代码，并添加了中文支持。
+本项目Folk自 [m1guelpf/auto-commit](https://github.com/m1guelpf/auto-commit)， 为适配墙内使用，修改了部分代码，并添加了中文支持。
 
 这是一个使用[Rust](https://www.rust-lang.org/)构建的CLI工具，利用[OpenAI的GPT-3.5](https://platform.openai.com/overview)从您的暂存更改中生成提交信息。
 
